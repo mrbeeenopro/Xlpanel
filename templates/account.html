@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/account.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -53,7 +54,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -61,8 +62,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -70,7 +70,6 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
@@ -108,7 +107,7 @@
             {% elif error=="changed" %}
             <div class="done">
                 <h3>Your password has been changed.</h3>
-                <h4>Remember: we don't change your pterodactyl account password!</h4>
+                <h4>Remember: we don't change your panel account password!</h4>
             </div>
             {% endif %}
 
@@ -119,8 +118,14 @@
                 </div>
                 <div class="r">
                     <h4>Role:</h4>
-                    <h3>{{"admin" if isAdmin else "user"}}</h3>
+                    <h3 id="roleText">{{"admin" if isAdmin else "user"}}</h3>
                 </div>
+                {% if site.get('discord_link') %}
+                <div class="r">
+                    <h4>Discord:</h4>
+                    <h3><a href="{{site.get('discord_link')}}" target="_blank" rel="noopener noreferrer">Join Discord</a></h3>
+                </div>
+                {% endif %}
                 <div class="cpass">
                     <h3 style="font-weight: 100">Change password</h3>
                     <form method="post" action="/account/change">
@@ -151,10 +156,10 @@
                     </form>
                 </div>
                 <div class="ptero">
-                    <h3 style="font-weight: 100">Pterodactyl credential</h3>
+                    <h3 style="font-weight: 100">Calagopus credential</h3>
                     <div class="inf">
                         <h4>Email:</h4>
-                        <input type="text" value="{{email}}" disabled>
+                        <input type="text" id="pteroEmail" value="{{email}}" disabled>
                     </div>
                     <div class="inf">
                         <h4>Password:</h4>
@@ -164,7 +169,7 @@
                     <script>
                         function reset() {
                             $("#pterobtn").attr("disabled","")
-                            fetch("/account/ptero/")
+                            fetch("/account/ptero/", { method: "POST" })
                             .then(r => r.json())
                             .then(r => {
                                 if (r.status == "ok") {
@@ -192,5 +197,22 @@
             </div>
         </footer>
     </div>
+    <script>
+        (function () {
+            fetch('/api/account')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) return;
+                    $('#roleText').text(data.isAdmin ? 'admin' : 'user');
+                    if (data.email) {
+                        $('#pteroEmail').val(data.email);
+                    }
+                    if (data.isAdmin) {
+                        $('#adminLink').show();
+                    }
+                })
+                .catch(() => {});
+        })();
+    </script>
 </body>
 </html>

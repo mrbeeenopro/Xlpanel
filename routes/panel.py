@@ -1,8 +1,9 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 
 @app.route("/panel/")
 @app.route("/panel/<a>")
 def gtpn(a:str=None):
-    if a: return redirect(config["pterodactyl"]["host"]+f"/server/{a}")
-    return redirect(config["pterodactyl"]["host"])
+    panel_host = helper.get_site_settings().get("panel_link", "").strip() or config.get("calagopus", config.get("pterodactyl", {})).get("host", "")
+    if a: return redirect(panel_host+f"/server/{a}")
+    return redirect(panel_host)

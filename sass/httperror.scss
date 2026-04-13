@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 body {
     display: block !important;
@@ -12,7 +12,7 @@ body {
     position: relative;
     top: 50%;
     transform: translateY(-50%);
-    @include glass(transparentize($pcolor, 0.1));
+    @include glass(alpha($pcolor, 0.1));
     user-select: none;
 
     * {
@@ -26,3 +26,4 @@ body {
         margin-left: 5px;
     }
 }
+

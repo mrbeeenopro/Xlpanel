@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 
 @app.route("/afk/", methods=["GET"])
@@ -9,14 +9,11 @@ def _afk():
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
-        uDt = helper.checkPteroUser(check[1]["user"])
-        if (uDt[0] == False):
-            return f"""Something went wrong!\n\nuDt response:\n{uDt}"""
 
         return render_template(
             "afk.html",
-            name=name,
-            isAdmin=uDt[1].get("root_admin",False),
+            name=helper.get_site_settings().get("site_name", name),
+            isAdmin=False,
             user=check[1]["user"],
             mIt=menuItems,
             coin=check[1]["coin"],

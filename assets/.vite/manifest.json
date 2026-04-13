@@ -1,0 +1,173 @@
+{
+  "assets/font/jetbrains-mono.ttf": {
+    "file": "media/jetbrains-mono.ttf",
+    "src": "assets/font/jetbrains-mono.ttf"
+  },
+  "assets/img/login-bg.gif": {
+    "file": "media/login-bg.gif",
+    "src": "assets/img/login-bg.gif"
+  },
+  "assets/img/register-bg.png": {
+    "file": "media/register-bg.png",
+    "src": "assets/img/register-bg.png"
+  },
+  "assets/js/account.js": {
+    "file": "js/account.js",
+    "name": "account",
+    "src": "assets/js/account.js",
+    "isEntry": true
+  },
+  "assets/js/admin.js": {
+    "file": "js/admin.js",
+    "name": "admin",
+    "src": "assets/js/admin.js",
+    "isEntry": true
+  },
+  "assets/js/afk.js": {
+    "file": "js/afk.js",
+    "name": "afk",
+    "src": "assets/js/afk.js",
+    "isEntry": true
+  },
+  "assets/js/dash.js": {
+    "file": "js/dash.js",
+    "name": "dash",
+    "src": "assets/js/dash.js",
+    "isEntry": true
+  },
+  "assets/js/server.js": {
+    "file": "js/server.js",
+    "name": "server",
+    "src": "assets/js/server.js",
+    "isEntry": true
+  },
+  "assets/js/signF.js": {
+    "file": "js/signF.js",
+    "name": "signF",
+    "src": "assets/js/signF.js",
+    "isEntry": true
+  },
+  "assets/js/store.js": {
+    "file": "js/store.js",
+    "name": "store",
+    "src": "assets/js/store.js",
+    "isEntry": true
+  },
+  "frontend/entries/style-account.js": {
+    "file": "js/style-account.js",
+    "name": "style-account",
+    "src": "frontend/entries/style-account.js",
+    "isEntry": true,
+    "css": [
+      "css/account.css"
+    ]
+  },
+  "frontend/entries/style-admin.js": {
+    "file": "js/style-admin.js",
+    "name": "style-admin",
+    "src": "frontend/entries/style-admin.js",
+    "isEntry": true,
+    "css": [
+      "css/admin.css"
+    ]
+  },
+  "frontend/entries/style-afk.js": {
+    "file": "js/style-afk.js",
+    "name": "style-afk",
+    "src": "frontend/entries/style-afk.js",
+    "isEntry": true,
+    "css": [
+      "css/afk.css"
+    ]
+  },
+  "frontend/entries/style-dash.js": {
+    "file": "js/style-dash.js",
+    "name": "style-dash",
+    "src": "frontend/entries/style-dash.js",
+    "isEntry": true,
+    "css": [
+      "css/dash.css"
+    ]
+  },
+  "frontend/entries/style-dash_css.js": {
+    "file": "js/style-dash_css.js",
+    "name": "style-dash_css",
+    "src": "frontend/entries/style-dash_css.js",
+    "isEntry": true,
+    "css": [
+      "css/dash_css.css"
+    ]
+  },
+  "frontend/entries/style-general.js": {
+    "file": "js/style-general.js",
+    "name": "style-general",
+    "src": "frontend/entries/style-general.js",
+    "isEntry": true,
+    "css": [
+      "css/general.css"
+    ],
+    "assets": [
+      "media/jetbrains-mono.ttf"
+    ]
+  },
+  "frontend/entries/style-httperror.js": {
+    "file": "js/style-httperror.js",
+    "name": "style-httperror",
+    "src": "frontend/entries/style-httperror.js",
+    "isEntry": true,
+    "css": [
+      "css/httperror.css"
+    ]
+  },
+  "frontend/entries/style-login.js": {
+    "file": "js/style-login.js",
+    "name": "style-login",
+    "src": "frontend/entries/style-login.js",
+    "isEntry": true,
+    "css": [
+      "css/login.css"
+    ],
+    "assets": [
+      "media/login-bg.gif"
+    ]
+  },
+  "frontend/entries/style-register.js": {
+    "file": "js/style-register.js",
+    "name": "style-register",
+    "src": "frontend/entries/style-register.js",
+    "isEntry": true,
+    "css": [
+      "css/register.css"
+    ],
+    "assets": [
+      "media/register-bg.png"
+    ]
+  },
+  "frontend/entries/style-server.js": {
+    "file": "js/style-server.js",
+    "name": "style-server",
+    "src": "frontend/entries/style-server.js",
+    "isEntry": true,
+    "css": [
+      "css/server.css"
+    ]
+  },
+  "frontend/entries/style-store.js": {
+    "file": "js/style-store.js",
+    "name": "style-store",
+    "src": "frontend/entries/style-store.js",
+    "isEntry": true,
+    "css": [
+      "css/store.css"
+    ]
+  },
+  "frontend/entries/style-verify.js": {
+    "file": "js/style-verify.js",
+    "name": "style-verify",
+    "src": "frontend/entries/style-verify.js",
+    "isEntry": true,
+    "css": [
+      "css/verify.css"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 body {
     display: flex;
@@ -30,7 +30,7 @@ body {
     max-width: 200px;
     min-width: 65px;
     height: 100%;
-    @include glass(transparentize($pcolor, 0.15), 0);
+    @include glass(alpha($pcolor, 0.15), 0);
     padding: 5px;
     overflow-y: auto;
     user-select: none;
@@ -80,7 +80,7 @@ body {
 
             &:active .it {
                 border-style: solid;
-                background-color: darken($pcolor, 10%);
+                background-color: shade($pcolor, 10%);
             }
         }
     }
@@ -89,7 +89,7 @@ body {
         width: 100%;
         max-width: 200px;
         padding: 10px;
-        @include glass(transparentize($pcolor, 0.1), 10px);
+        @include glass(alpha($pcolor, 0.1), 10px);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -125,7 +125,7 @@ body {
                 svg {
 
                     path {
-                        fill: darken(#aa0000, 15%);
+                        fill: shade(#aa0000, 15%);
                     }
                 }
             }
@@ -133,12 +133,12 @@ body {
     }
 
     #menuToggle {
-        background-color: transparentize($pcolor, 0.85);
+        background-color: alpha($pcolor, 0.85);
         display: none;
     }
 
     .items .sp .it {
-        background-color: darken($pcolor, 10%) !important;
+        background-color: shade($pcolor, 10%) !important;
     }
 }
 
@@ -156,7 +156,7 @@ body {
 
     footer {
         width: 100%;
-        @include glass(transparentize($pcolor, 0.15),0);
+        @include glass(alpha($pcolor, 0.15),0);
         user-select: none;
         display: flex;
         flex-wrap: wrap;
@@ -246,3 +246,4 @@ main {
 
     #menuToggle {display: flex !important;}
 }
+

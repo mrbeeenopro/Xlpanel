@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 main {
     display: flex;
@@ -99,7 +99,7 @@ main {
         input {
             width: 100%;
             @include button($pcolor);
-            background-color: darken($pcolor, 20%);
+            background-color: shade($pcolor, 20%);
             margin-bottom: 5px;
         }
     }
@@ -123,3 +123,4 @@ main {
         display: none;
     }
 }
+

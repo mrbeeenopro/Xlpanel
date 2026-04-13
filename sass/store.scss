@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 main {
     padding: 20px;
@@ -18,7 +18,7 @@ main {
         .it {
             padding: 20px;
             margin-top: 20px;
-            @include glass(transparentize($pcolor, 0.1));
+            @include glass(alpha($pcolor, 0.1));
             width: 100%;
             max-width: 200px;
 
@@ -28,7 +28,7 @@ main {
                 @include input($pcolor);
 
                 * {
-                    background-color: lighten($pcolor, 10%);
+                    background-color: tint($pcolor, 10%);
                 }
             }
 
@@ -55,3 +55,4 @@ main {
         @include glass(#00aa00);
     }
 }
+

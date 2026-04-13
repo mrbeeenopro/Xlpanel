@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/assets/css/general.css">
+    <link rel="stylesheet" href="/assets/css/dash_css.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{settings.get('site_logo','/assets/img/logo.png')}}" type="image/png">
+    <script src="/assets/js/dash.js"></script>
+    <title>Settings - {{name}}</title>
+</head>
+<body>
+    <div class="nav">
+        <div class="name">{{name}}</div>
+        <div class="items">
+            <a href="/admin"><div class="it"><div class="icon"><i class="fa-solid fa-users"></i></div><it>Users</it></div></a>
+            <a href="/admin/settings" class="sp"><div class="it"><div class="icon"><i class="fa-solid fa-gears"></i></div><it>Settings</it></div></a>
+        </div>
+        <div class="users">
+            <div class="one"><h5>{{user}}</h5><h6>Coins: {{coin}}</h6></div>
+            <div class="two"><button onclick="window.location='/logout'"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+        </div>
+    </div>
+    <div class="main">
+        <main style="opacity:1;padding:20px;">
+            <div class="title1">
+                <h2>Panel Settings</h2>
+            </div>
+            {% if error == "saved" %}
+            <div class="done"><h3>Settings saved.</h3></div>
+            {% endif %}
+            <div class="form">
+                <form method="post">
+                    <div class="e">
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="site_name" placeholder="Panel name" value="{{settings.get('site_name','Xlpanel')}}" required>
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="site_logo" placeholder="Logo URL/Path" value="{{settings.get('site_logo','/assets/img/logo.png')}}" required>
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="discord_link" placeholder="Discord server invite link" value="{{settings.get('discord_link','')}}">
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="panel_link" placeholder="Panel link (override /panel)" value="{{settings.get('panel_link','')}}">
+                        </div>
+                    </div>
+                    <h3 style="margin-top:16px">Theme</h3>
+                    <div class="e">
+                        <div class="inp"><input type="color" name="theme_primary" value="{{settings.get('theme_primary','#0000aa')}}"></div>
+                        <div class="inp"><input type="color" name="theme_accent" value="{{settings.get('theme_accent','#0000dd')}}"></div>
+                        <div class="inp"><input type="color" name="theme_danger" value="{{settings.get('theme_danger','#aa0000')}}"></div>
+                        <div class="inp"><input type="color" name="theme_bg" value="{{settings.get('theme_bg','#000010')}}"></div>
+                    </div>
+                    <h3 style="margin-top:16px">Discord OAuth</h3>
+                    <div class="e">
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <label><input type="checkbox" name="discord_oauth_enable" value="1" {% if settings.get('discord_oauth_enable') %}checked{% endif %}> Enable Discord Login</label>
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="discord_client_id" placeholder="Discord Client ID" value="{{settings.get('discord_client_id','')}}">
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="discord_client_secret" placeholder="Discord Client Secret" value="{{settings.get('discord_client_secret','')}}">
+                        </div>
+                        <div class="inp" style="max-width:unset;width:100%">
+                            <input type="text" name="discord_redirect_uri" placeholder="Discord Redirect URI" value="{{settings.get('discord_redirect_uri','')}}">
+                        </div>
+                    </div>
+                    <button type="submit">Save Settings</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

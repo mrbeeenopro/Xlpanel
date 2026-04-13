@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // free light theme
 // $pcolor: #87CEEB;
 // $text-color: #2F4F4F;
@@ -8,12 +10,24 @@ $pcolor: #0000aa;
 $text-color: white;
 $bgcolor: #000010;
 
-@function is-light($color) {
-    @return lightness($color) > 50%;
+@function alpha($color-value, $amount) {
+    @return color.adjust($color-value, $alpha: -$amount);
 }
 
-@function get-bg($color) {
-    @if is-light($color) {
+@function tint($color-value, $amount) {
+    @return color.adjust($color-value, $lightness: $amount);
+}
+
+@function shade($color-value, $amount) {
+    @return color.adjust($color-value, $lightness: -$amount);
+}
+
+@function is-light($color-value) {
+    @return color.channel($color-value, "lightness", $space: hsl) > 50%;
+}
+
+@function get-bg($color-value) {
+    @if is-light($color-value) {
         @return rgba(255, 255, 239, 0.8);
     }
     @else {
@@ -21,51 +35,50 @@ $bgcolor: #000010;
     }
 }
 
-
-
-@mixin glass($color, $mara:16px) {
+@mixin glass($color-value, $mara:16px) {
     color: $text-color;
-    background: transparentize($color, 0.8);
+    background: alpha($color-value, 0.8);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     border-radius: $mara;
-    border: 1px solid transparentize($color, 0.7);
+    border: 1px solid alpha($color-value, 0.7);
 }
 
-@mixin input($color, $mara:10px) {
+@mixin input($color-value, $mara:10px) {
     color: $text-color;
     transition: 0.3s;
     background-color: transparent;
     padding: 7px;
     border-radius: $mara;
-    border: solid 1px transparentize($color, 0.55);
+    border: solid 1px alpha($color-value, 0.55);
 
     &:focus {
-        border-color: $color;
+        border-color: $color-value;
         outline: none;
     }
 }
 
-@mixin button($color, $mara:10px) {
+@mixin button($color-value, $mara:10px) {
     color: $text-color;
     transition: 0.3s;
     background-color: transparent;
     padding: 5px;
     border-radius: $mara;
-    border: solid 1px transparentize($color, 0.5);
+    border: solid 1px alpha($color-value, 0.5);
     cursor: pointer;
 
     &:hover {
-        border-color: $color;
+        border-color: $color-value;
     }
 
     &:active {
-        background-color: $color;
+        background-color: $color-value;
     }
 
     &:disabled {
-        border: solid 1px transparentize($color, 0.9);
+        border: solid 1px alpha($color-value, 0.9);
         background-color: transparent;
-        color: transparentize($text-color, 0.6);
+        color: alpha($text-color, 0.6);
         cursor: default;
     }
 }
+

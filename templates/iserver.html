@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/server.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -51,7 +52,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -59,8 +60,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -68,7 +68,6 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
@@ -96,7 +95,7 @@
             <div class="title">
                 <h2>Server detail</h2>
                 {% if i %}
-                <h4>Here is the detail info for {{i["identifier"]}}</h4>
+                <h4 id="serverSubTitle">Here is the detail info for {{i["identifier"]}}</h4>
                 {% endif %}
             </div>
             {% if error!="none" and error %}
@@ -112,32 +111,32 @@
             {% if i %}
             <div class="isv">
                 <div class="sio">
-                    <form action="edit" method="get">
+                    <form action="edit/" method="post">
                         <h2 style="overflow-x: hidden;
-                                    text-overflow: ellipsis;">{{i["name"]}}</h2>
-                        <h6 style="margin-bottom: 15px">{{i['identifier']}}</h6>
+                                    text-overflow: ellipsis;" id="serverName">{{i["name"]}}</h2>
+                        <h6 style="margin-bottom: 15px" id="serverId">{{i['identifier']}}</h6>
                         <div class="info">
                             <h4>CPU:</h4>
                             <div>
-                                <input type="number" min="1" max="99999" name="cpu" value='{{i["limits"]["cpu"]}}'></input><h4>%</h4>&nbsp;
+                                <input type="number" min="1" max="99999" name="cpu" id="serverCpu" value='{{i["limits"]["cpu"]}}'></input><h4>%</h4>&nbsp;
                             </div>
                         </div>
                         <div class="info">
                             <h4>Ram:</h4>
                             <div>
-                                <input type="number" min="1" max="99999" name="ram" value='{{i["limits"]["memory"]}}'></input><h4>MB</h4>
+                                <input type="number" min="1" max="99999" name="ram" id="serverRam" value='{{i["limits"]["memory"]}}'></input><h4>MB</h4>
                             </div>
                         </div>
                         <div class="info">
                             <h4>Disk:</h4>
                             <div>
-                                <input type="number" min="1" max="99999" name="disk" inputmode="numeric" value='{{i["limits"]["disk"]}}'></input><h4>MB</h4>
+                                <input type="number" min="1" max="99999" name="disk" id="serverDisk" inputmode="numeric" value='{{i["limits"]["disk"]}}'></input><h4>MB</h4>
                             </div>
                         </div>
-                        <div class="info"><h4>Status:</h4><h4>{{i.get("status") if i.get("status") else "active"}}</h4></div>
+                        <div class="info"><h4>Status:</h4><h4 id="serverStatus">{{i.get("status") if i.get("status") else "active"}}</h4></div>
                         <div class="btn">
-                            <button type="button" class="del" onclick="del()">Delete</button>
-                            <button>Update</button>
+                            <button type="button" id="deleteBtn" class="del" onclick="del()">Delete</button>
+                            <button id="updateBtn">Update</button>
                         </div>
                     </form>
                 </div>
@@ -157,5 +156,44 @@
             </div>
         </footer>
     </div>
+    <script>
+        (function () {
+            const identity = {{ i["identifier"]|tojson }};
+            fetch(`/api/servers/${encodeURIComponent(identity)}`)
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok || !data.server) {
+                        $('#serverName').text('Server not found');
+                        $('#serverStatus').text('error');
+                        $('#deleteBtn').attr('disabled', '');
+                        $('#updateBtn').attr('disabled', '');
+                        return;
+                    }
+                    const s = data.server;
+                    $('#serverName').text(s.name || '-');
+                    $('#serverId').text(s.identifier || identity);
+                    $('#serverSubTitle').text(`Here is the detail info for ${s.identifier || identity}`);
+                    $('#serverCpu').val(s.limits?.cpu ?? 1);
+                    $('#serverRam').val(s.limits?.memory ?? 1);
+                    $('#serverDisk').val(s.limits?.disk ?? 1);
+                    $('#serverStatus').text(s.status || 'active');
+
+                    fetch('/api/auth/session')
+                        .then((r) => r.json())
+                        .then((session) => {
+                            if (session && session.authenticated && session.user && session.user.isAdmin) {
+                                $('#adminLink').show();
+                            }
+                        })
+                        .catch(() => {});
+                })
+                .catch(() => {
+                    $('#serverName').text('Failed to load server');
+                    $('#serverStatus').text('error');
+                    $('#deleteBtn').attr('disabled', '');
+                    $('#updateBtn').attr('disabled', '');
+                });
+        })();
+    </script>
 </body>
 </html>

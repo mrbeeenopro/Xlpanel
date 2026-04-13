@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 import random
 
@@ -64,22 +64,18 @@ def dashboard():
         hour = int(datetime.datetime.now().strftime("%H"))
         bigWel = f"""Good {"midnight" if 0<=hour<5 else "morning" if 5<=hour<=12 else "afternoon" if 13<=hour<=17 else "evening"}!"""
         smallWel = random.choice(welSen).format(user=check[1]["user"])
-        uSv = helper.listPteroServer(check[1]["user"])
-        uDt = helper.checkPteroUser(check[1]["user"])
-        if (uSv[0] == False) or (uDt[0] == False):
-            return f"""Something went wrong!\n\nuSv response:\n{uSv}\n\nuDt response:\n{uDt}"""
 
         return render_template(
             "dash.html",
-            name=name,
+            name=helper.get_site_settings().get("site_name", name),
             bigWel=bigWel,
             smallWel=smallWel,
-            isAdmin=uDt[1].get("root_admin",False),
+            isAdmin=False,
             user=check[1]["user"],
-            cpu=check[1]["cpu"]-uSv[2],
-            ram=(check[1]["ram"]-uSv[4])/100000*100000,
-            disk=(check[1]["disk"]-uSv[3])/100000*100000,
-            slot=check[1]["slot"]-len(uSv[1]),
+            cpu=0,
+            ram=0,
+            disk=0,
+            slot=0,
             coin=check[1]["coin"],
             dcpu=check[1]["cpu"],
             dram=check[1]["ram"],

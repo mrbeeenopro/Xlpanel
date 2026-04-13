@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 body {
     padding: 10px;
@@ -14,7 +14,7 @@ main {
     padding: 16px;
     text-align: center;
     user-select: none;
-    @include glass(transparentize($pcolor, 0.1));
+    @include glass(alpha($pcolor, 0.1));
 
     input {
         padding: 0 10px 5px 10px;
@@ -37,9 +37,10 @@ main {
         @include button($pcolor);
 
         &:disabled {
-            background-color: transparentize($pcolor, 0.8);
+            background-color: alpha($pcolor, 0.8);
             border-color: transparent;
             color: #ffffff40;
         }
     }
 }
+

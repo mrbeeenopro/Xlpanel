@@ -1,5 +1,5 @@
 #type: ignore
-from __main__ import *
+from app.runtime import *
 
 @app.route("/banned/")
 def _bn():

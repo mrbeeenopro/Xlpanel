@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 main {
     padding: 20px;
@@ -14,13 +14,13 @@ main {
         max-width: 1000px;
         padding: 20px;
         margin: 20px auto;
-        @include glass(transparentize($pcolor, 0.1));
+        @include glass(alpha($pcolor, 0.1));
         user-select: none;
 
         .bar {
             width: 100%;
             height: 3px;
-            background-color: transparentize($pcolor, 0.6);
+            background-color: alpha($pcolor, 0.6);
             margin: 10px 0;
             overflow: hidden;
 
@@ -33,3 +33,4 @@ main {
         }
     }
 }
+

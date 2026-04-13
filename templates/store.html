@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/store.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -51,7 +52,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -59,8 +60,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -68,12 +68,11 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
             <h5>{{user}}</h5>
-            <h6>Coins: {{coin}}</h6>
+            <h6 id="coinText">Coins: {{coin}}</h6>
             </div>
             <div class="two">
                 <button onclick="window.location='/logout'">
@@ -108,7 +107,7 @@
                 <h3>Done. Now you can use the resouces.</h3>
             </div>
             {% endif %}
-            <div class="items">
+            <div class="items" id="storeItems">
                 <div class="it">
                     <h3>CPU</h3>
                     <select name="cpu">
@@ -168,9 +167,52 @@
             </div>
         </footer>
     </div>
-    <form id="hehe" action="/store/buy/" style="display: none">
+    <form id="hehe" action="/store/buy/" method="post" style="display: none">
         <input type="text" name="item" id="sbi">
         <input type="text" name="amount" id="sba">
     </form>
+    <script>
+        (function () {
+            const order = ['cpu', 'ram', 'disk', 'slot'];
+            const labels = { cpu: 'CPU', ram: 'Ram', disk: 'Disk', slot: 'Slot' };
+            const units = { cpu: '%', ram: 'MB', disk: 'MB', slot: ' slot(s)' };
+
+            fetch('/api/store')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) return;
+                    if (typeof data.coin !== 'undefined') {
+                        $('#coinText').text(`Coins: ${data.coin}`);
+                    }
+                    const s = data.store || {};
+                    const html = order.map((k) => {
+                        const price = Number((s[k] || [0, 0])[0]) || 0;
+                        const amount = Number((s[k] || [0, 0])[1]) || 0;
+                        const options = Array.from({ length: 10 }, (_, idx) => {
+                            const i = idx + 1;
+                            return `<option value="${i}">${amount * i}${units[k]} - ${price * i} coin(s)</option>`;
+                        }).join('');
+                        return `
+                            <div class="it">
+                                <h3>${labels[k]}</h3>
+                                <select name="${k}">${options}</select>
+                                <button onclick="buy(this)">Buy</button>
+                            </div>
+                        `;
+                    }).join('');
+                    document.getElementById('storeItems').innerHTML = html;
+                })
+                .catch(() => {});
+
+            fetch('/api/auth/session')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data && data.authenticated && data.user && data.user.isAdmin) {
+                        $('#adminLink').show();
+                    }
+                })
+                .catch(() => {});
+        })();
+    </script>
 </body>
 </html>

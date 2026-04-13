@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 import db
 
@@ -10,14 +10,11 @@ def _store():
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
-        uDt = helper.checkPteroUser(check[1]["user"])
-        if (uDt[0] == False):
-            return f"""Something went wrong!\n\nuDt response:\n{uDt}"""
 
         return render_template(
             "store.html",
-            name=name,
-            isAdmin=uDt[1].get("root_admin",False),
+            name=helper.get_site_settings().get("site_name", name),
+            isAdmin=False,
             user=check[1]["user"],
             mIt=menuItems,
             coin=check[1]["coin"],
@@ -29,20 +26,23 @@ def _store():
             loadTime=int((time.time()-beginT)*100000)/100000
         )
 
-@app.route("/store/buy/", methods=["GET"])
+@app.route("/store/buy/", methods=["POST"])
 def _buy():
-    if request.method == "GET":
+    if request.method == "POST":
+        if not helper.is_same_origin(request):
+            abort(403)
         beginT = time.time()
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
-        item = request.args.get("item")
-        print(item)
-        amount = request.args.get("amount")
+        item = request.form.get("item")
+        amount = request.form.get("amount", "")
         if item not in ["cpu", "ram", "disk", "slot"]:
             return redirect("/store?err=Invalid item.")
         elif not amount.isdigit():
             return redirect("/store?err=Invalid data type.")
+        if int(amount) <= 0 or int(amount) > 1000:
+            return redirect("/store?err=Invalid amount.")
         if (store[item][0]*int(amount)) > check[1]["coin"]:
             return redirect("/store?err=Not enough coins.")
         conn = db.connect()

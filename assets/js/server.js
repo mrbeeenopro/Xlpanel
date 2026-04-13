@@ -1,10 +1,7 @@
 $(document).ready(()=>{
     $(".form form").on( "submit", function( event ) {
-        if (
-            $("select[name=\"node\"]").val()=="_"
-            ||
-            $("select[name=\"egg\"]").val()=="_"
-        ) {
+        const egg = $("select[name=\"egg\"]").val();
+        if (!egg || egg === "_") {
             alert("Please fill out the form.")
             event.preventDefault();
         }

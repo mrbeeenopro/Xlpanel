@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/server.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -51,7 +52,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -59,8 +60,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -68,7 +68,6 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
@@ -101,7 +100,7 @@
                 <i class="fa-solid fa-xmark"></i>
             </a></h2>
             <h2 style="margin-bottom: 10px; font-weight: 100;">Create</h2>
-            <form action="/servers/create">
+            <form action="/servers/create/" method="post">
                 <div class="inp">
                     <input type="text" name="name" placeholder="Name" required>
                 </div>
@@ -118,9 +117,7 @@
                 </div>
                 <div class="inp">
                     <select name="node">
-                        <optgroup label="_">
-                            <option value="_">Choose node</option>
-                        </optgroup>
+                        <option value="">Auto node</option>
                         <optgroup label="Nodes">
                             {% for i in list(nodes.keys()) %}
                             <option value="{{i}}">{{nodes[i]["name"]}}</option>
@@ -130,9 +127,7 @@
                 </div>
                 <div class="inp">
                     <select name="egg">
-                        <optgroup label="_">
-                            <option value="_">Choose egg</option>
-                        </optgroup>
+                        <option value="">Auto egg</option>
                         <optgroup label="Eggs">
                             {% for i in list(eggs.keys()) %}
                             <option value="{{i}}">{{eggs[i]["name"]}}</option>
@@ -166,7 +161,10 @@
                 <h3>Your server has been created.</h3>
             </div>
             {% endif %}
-            <div class="sv">
+            <div class="sv" id="serverList">
+                <div class="sio">
+                    <h4>Loading servers...</h4>
+                </div>
                 {% for i in sv %}
                     <div class="sio">
                         <h2 style="overflow-x: hidden;
@@ -197,5 +195,87 @@
             </div>
         </footer>
     </div>
+    <script>
+        (function () {
+            const serverList = document.getElementById('serverList');
+            const esc = (s) => String(s ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+
+            fetch('/api/servers')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) return;
+                    const servers = Array.isArray(data.servers) ? data.servers : [];
+                    if (!servers.length) {
+                        serverList.innerHTML = '<div class="sio"><h4>No servers yet.</h4></div>';
+                    } else {
+                        serverList.innerHTML = servers.map((i) => `
+                            <div class="sio">
+                                <h2 style="overflow-x: hidden; text-overflow: ellipsis;">${esc(i.name)}</h2>
+                                <h6>${esc(i.identifier)}</h6>
+                                <div class="info" style="margin-top: 5px"><h4>CPU:</h4><h4>${esc(i.limits?.cpu ?? 0)}%</h4></div>
+                                <div class="info" style="margin-top: 5px"><h4>Ram:</h4><h4>${esc(i.limits?.memory ?? 0)}MB</h4></div>
+                                <div class="info" style="margin-top: 5px"><h4>Disk:</h4><h4>${esc(i.limits?.disk ?? 0)}MB</h4></div>
+                                <div class="info" style="margin-top: 5px"><h4>Status:</h4><h4 id="status-${esc(i.identifier)}">${esc(i.status || 'active')}</h4></div>
+                                <div class="btn">
+                                    <a href="/panel/${encodeURIComponent(i.identifier)}" target="_blank"><button>Panel</button></a>
+                                    <a href="/server/${encodeURIComponent(i.identifier)}"><button>Manage</button></a>
+                                </div>
+                                <div class="btn" style="margin-top: 8px;">
+                                    <button onclick="serverPower('${esc(i.identifier)}','start')">Start</button>
+                                    <button onclick="serverPower('${esc(i.identifier)}','stop')">Stop</button>
+                                    <button onclick="serverPower('${esc(i.identifier)}','restart')">Restart</button>
+                                    <button class="danger" onclick="serverPower('${esc(i.identifier)}','kill')">Kill</button>
+                                    <button class="secondary" onclick="refreshServerStatus('${esc(i.identifier)}')">Refresh</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    if (data.isAdmin) {
+                        $('#adminLink').show();
+                    }
+                })
+                .catch(() => {
+                    serverList.innerHTML = '<div class="sio"><h4>Failed to load servers.</h4></div>';
+                });
+        })();
+
+        function serverPower(identifier, action) {
+            fetch(`/api/servers/${encodeURIComponent(identifier)}/power`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) {
+                        alert((data && data.error) ? data.error : 'Power action failed.');
+                        return;
+                    }
+                    const statusEl = document.getElementById(`status-${identifier}`);
+                    if (statusEl && data.status) statusEl.textContent = data.status;
+                })
+                .catch(() => alert('Power action failed.'));
+        }
+
+        function refreshServerStatus(identifier) {
+            fetch(`/api/servers/${encodeURIComponent(identifier)}/status`)
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) {
+                        alert((data && data.error) ? data.error : 'Cannot refresh status.');
+                        return;
+                    }
+                    const statusEl = document.getElementById(`status-${identifier}`);
+                    if (statusEl) statusEl.textContent = data.status || 'unknown';
+                })
+                .catch(() => alert('Cannot refresh status.'));
+        }
+    </script>
 </body>
 </html>

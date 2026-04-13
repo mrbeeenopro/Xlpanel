@@ -1,4 +1,4 @@
-@import "data";
+@use "data" as *;
 
 main {
     padding: 20px;
@@ -9,7 +9,7 @@ main {
         height: fit-content;
         padding: 20px;
         margin-bottom: 20px;
-        @include glass(transparentize($pcolor, 0.1));
+        @include glass(alpha($pcolor, 0.1));
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap-reverse;
@@ -55,7 +55,7 @@ main {
         user-select: none;
         padding: 16px;
         margin-top: 20px;
-        @include glass(transparentize($pcolor, 0.1));
+        @include glass(alpha($pcolor, 0.1));
 
         .e {
             .inp {
@@ -86,14 +86,14 @@ main {
         user-select: none;
         padding: 16px;
         margin-top: 20px;
-        @include glass(transparentize($pcolor, 0.1));
+        @include glass(alpha($pcolor, 0.1));
 
         h4, h5 {
             font-weight: 100;
         }
 
         .user {
-            @include glass(transparentize($pcolor, 0.1));
+            @include glass(alpha($pcolor, 0.1));
             padding: 16px;
             margin-top: 10px;
             display: flex;
@@ -143,3 +143,4 @@ main {
         }
     }
 }
+

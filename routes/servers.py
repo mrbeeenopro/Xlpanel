@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 
 @app.route("/servers/", methods=["GET"])
@@ -9,21 +9,20 @@ def servers():
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
-
-        uSv = helper.listPteroServer(check[1]["user"])
-        uDt = helper.checkPteroUser(check[1]["user"])
-        if (uSv[0] == False) or (uDt[0] == False):
-            return f"""Something went wrong!\n\nuSv response:\n{uSv}\n\nuDt response:\n{uDt}"""
+        runtime_nodes = helper.get_runtime_nodes()
+        runtime_eggs = helper.get_runtime_eggs()
+        resolved_nodes = runtime_nodes[1] if runtime_nodes[0] else nodeList
+        resolved_eggs = runtime_eggs[1] if runtime_eggs[0] else eggsList
 
         return render_template(
             "server.html",
-            name=name,
-            isAdmin=uDt[1].get("root_admin",False),
+            name=helper.get_site_settings().get("site_name", name),
+            isAdmin=False,
             user=check[1]["user"],
-            sv = uSv[1],
+            sv = [],
             error = request.args.get("err", None),
-            eggs=eggsList,
-            nodes=nodeList,
+            eggs=resolved_eggs,
+            nodes=resolved_nodes,
             mIt=menuItems,
             
             
@@ -38,38 +37,29 @@ def _sv(identity: str):
     check = helper.chSID(request.cookies.get("sid"))
     if (not check[0]):
         return redirect("/login")
-    uSv = helper.listPteroServer(check[1]["user"])
-    uDt = helper.checkPteroUser(check[1]["user"])
     if request.method == "GET":
-        if (uSv[0] == False) or (uDt[0] == False):
-            return f"""Something went wrong!\n\nuSv response:\n{uSv}\n\nuDt response:\n{uDt}"""
-        for i in uSv[1]:
-            if i["identifier"] == identity:
-                return render_template(
-                    "iserver.html",
-                    name=name,
-                    isAdmin=uDt[1].get("root_admin",False),
-                    user=check[1]["user"],
-                    i=i,
-                    error = request.args.get("err"),
-                    mIt=menuItems,
-                    coin=check[1]["coin"],
-                    loadTime=int((time.time()-beginT)*100000)/100000
-                )
         return render_template(
             "iserver.html",
-            name=name,
-            isAdmin=uDt[1].get("root_admin",False),
+            name=helper.get_site_settings().get("site_name", name),
+            isAdmin=False,
             user=check[1]["user"],
-            error="You don't have permission to modify this server.",
-            
-            
-            
+            i={
+                "name": "Loading...",
+                "identifier": identity,
+                "limits": {"cpu": 1, "memory": 1, "disk": 1},
+                "status": "loading"
+            },
+            error=request.args.get("err"),
             mIt=menuItems,
             coin=check[1]["coin"],
             loadTime=int((time.time()-beginT)*100000)/100000
         )
     elif request.method == "DELETE":
+        if not helper.is_same_origin(request):
+            return jsonify({"status": "error", "message": "Forbidden."}), 403
+        uSv = helper.listPteroServer(check[1]["user"])
+        if not uSv[0]:
+            return jsonify({"status": "error", "message": str(uSv[1]) if len(uSv) > 1 else "Cannot load servers."})
         for i in uSv[1]:
             if i["identifier"] == identity:
                 if i["status"] == "suspended":

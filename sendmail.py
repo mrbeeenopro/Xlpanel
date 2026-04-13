@@ -2,11 +2,10 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from flask import Flask, render_template
-import json
+from app.config_loader import load_config
 
 app = Flask(__name__, template_folder="templates")
-with open("config.json","r") as f:
-    config = json.load(f)
+config = load_config()
 
 
 def sendVerify(rEml, code):

@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/admin.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -51,7 +52,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -59,8 +60,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -68,12 +68,11 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
             <h5>{{user}}</h5>
-            <h6>Coins: {{coin}}</h6>
+            <h6 id="coinText">Coins: {{coin}}</h6>
             </div>
             <div class="two">
                 <button onclick="window.location='/logout'">
@@ -95,12 +94,15 @@
         <main>
             <div class="title">
                 <div class="img">
-                    <img src="/assets/img/Xlpanel-transparent.png">
+                    <img src="{{site.get('site_logo', '/assets/img/Xlpanel-transparent.png')}}">
                 </div>
                 <div class="info">
-                    <info style="font-size: 5vw">Xlpanel</info><br>
+                    <info style="font-size: 5vw">{{name}}</info><br>
                     <info>Current version: {{version}}({{codename}})</info>
                 </div>
+            </div>
+            <div class="form">
+                <a href="/admin/settings"><button type="button">Open Settings Page</button></a>
             </div>
             <div class="title1">
                 <h2>Admin</h2>
@@ -118,7 +120,7 @@
             {% endif %}
             <div class="form addRs">
                 <h3>Add resources</h3>
-                <form action="/admin/add">
+                <form action="/admin/add/" method="post">
                     <div class="e">
                         <div class="inp" style="max-width: unset;width: 100%">
                             <input type="text" name="user" maxlength="32" placeholder="Username" required>
@@ -144,61 +146,14 @@
             </div>
             <div class="userManager">
                 <h3>Manage users</h3>
-                <h5>Total user: {{len(ul)}}</h5>
-                {% for i in ul %}
-                <div class="user">
-                    <div class="info">
-                        <div class="inf">
-                            <h4>Username:</h4>
-                            <h4 style="user-select: text">{{i[0]}}</h4>
+                <h5 id="userTotal">Total user: {{len(ul)}}</h5>
+                <div id="userList">
+                    <div class="user">
+                        <div class="info">
+                            <h4>Loading users...</h4>
                         </div>
-                        <div class="inf">
-                            <h4>Email:</h4>
-                            <h4 style="user-select: text">{{i[6]}}</h4>
-                        </div>
-                        <div class="inf">
-                            <h4>Verified:</h4>
-                            <h4 {% if not i[7] %} style="color: #aa0000" {% endif %}>{{"True" if i[7] else "False"}}</h4>
-                        </div>
-                        <div class="inf">
-                            <h4>coin:</h4>
-                            <h4>{{i[1]}}</h4>
-                        </div>
-                        <div class="res">
-                            <div>
-                                <h5>
-                                    <i class="fa-solid fa-microchip"></i>
-                                </h5>
-                                <h5>
-                                    {{i[2]}}%
-                                </h5>
-                            </div>
-                            <div>
-                                <h5>
-                                    <i class="fa-solid fa-hard-drive"></i>
-                                </h5>
-                                <h5>
-                                    {{i[3]}}MB
-                                </h5>
-                            </div>
-                            <div>
-                                <h5>
-                                    <i class="fa-solid fa-memory"></i>
-                                </h5>
-                                <h5>
-                                    {{i[4]}}MB
-                                </h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="action">
-                        {% if i[0] != user %}
-                        <button class="del" onclick="window.location = '/admin/ban/{{i[0]}}'">{{"Unb" if i[5] else "B"}}an</button>
-                        <button onclick="window.location = '/admin/createPtero/{{i[0]}}/{{i[6]}}'">Create panel account</button>
-                        {% endif %}
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </main>
         <footer>
@@ -214,5 +169,76 @@
             </div>
         </footer>
     </div>
+    <script>
+        (function () {
+            const me = {{ user|tojson }};
+            const esc = (s) => String(s ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+
+            fetch('/api/admin/users')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) {
+                        document.getElementById('userList').innerHTML = '<div class="user"><div class="info"><h4>Failed to load users.</h4></div></div>';
+                        return;
+                    }
+
+                    $('#adminLink').show();
+                    fetch('/api/auth/session')
+                        .then((r) => r.json())
+                        .then((s) => {
+                            if (s && s.authenticated && s.user && typeof s.user.coin !== 'undefined') {
+                                $('#coinText').text(`Coins: ${s.user.coin}`);
+                            }
+                        })
+                        .catch(() => {});
+
+                    const users = Array.isArray(data.users) ? data.users : [];
+                    $('#userTotal').text(`Total user: ${users.length}`);
+
+                    if (!users.length) {
+                        document.getElementById('userList').innerHTML = '<div class="user"><div class="info"><h4>No users.</h4></div></div>';
+                        return;
+                    }
+
+                    document.getElementById('userList').innerHTML = users.map((i) => {
+                        const selfActions = i[0] === me ? '' : `
+                            <form action="/admin/ban/" method="post" style="display: inline">
+                                <input type="hidden" name="user" value="${esc(i[0])}">
+                                <button type="submit" class="del">${i[5] ? 'Unb' : 'B'}an</button>
+                            </form>
+                            <form action="/admin/createPtero/" method="post" style="display: inline">
+                                <input type="hidden" name="user" value="${esc(i[0])}">
+                                <input type="hidden" name="email" value="${esc(i[6])}">
+                                <button type="submit">Create panel account</button>
+                            </form>
+                        `;
+                        return `
+                            <div class="user">
+                                <div class="info">
+                                    <div class="inf"><h4>Username:</h4><h4 style="user-select: text">${esc(i[0])}</h4></div>
+                                    <div class="inf"><h4>Email:</h4><h4 style="user-select: text">${esc(i[6])}</h4></div>
+                                    <div class="inf"><h4>Verified:</h4><h4 ${i[7] ? '' : 'style="color: #aa0000"'}>${i[7] ? 'True' : 'False'}</h4></div>
+                                    <div class="inf"><h4>coin:</h4><h4>${esc(i[1])}</h4></div>
+                                    <div class="res">
+                                        <div><h5><i class="fa-solid fa-microchip"></i></h5><h5>${esc(i[2])}%</h5></div>
+                                        <div><h5><i class="fa-solid fa-hard-drive"></i></h5><h5>${esc(i[3])}MB</h5></div>
+                                        <div><h5><i class="fa-solid fa-memory"></i></h5><h5>${esc(i[4])}MB</h5></div>
+                                    </div>
+                                </div>
+                                <div class="action">${selfActions}</div>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    document.getElementById('userList').innerHTML = '<div class="user"><div class="info"><h4>Failed to load users.</h4></div></div>';
+                });
+        })();
+    </script>
 </body>
 </html>

@@ -5,3 +5,4 @@ bcrypt==4.1.1
 dnspython
 requests
 libsass
+redis

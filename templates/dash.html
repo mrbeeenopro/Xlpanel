@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/dash_css.css">
     <link rel="stylesheet" href="/assets/css/dash.css">
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/theme.css">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script>
         document.onreadystatechange = function() {
             if (document.readyState == 'complete') {
@@ -50,7 +51,7 @@
                 </div>
             </a>
             {% endfor %}
-            <a href="/panel" target="_blank">
+            <a href="{{site.get('panel_link') or '/panel'}}" target="_blank">
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -58,8 +59,7 @@
                     <it>Panel</it>
                 </div>
             </a>
-            {% if isAdmin %}
-            <a href="/admin">
+            <a href="/admin" id="adminLink" {% if not isAdmin %}style="display:none"{% endif %}>
                 <div class="it">
                     <div class="icon">
                         <i class="fa-solid fa-lock"></i>
@@ -67,7 +67,6 @@
                     <it>Admin Panel</it>
                 </div>
             </a>
-            {% endif %}
         </div>
         <div class="users">
             <div class="one">
@@ -98,27 +97,27 @@
             </div>
             <div class="info">
                 <div class="item">
-                    <div class="name">cpu: {{int(cpu)}}%/{{dcpu}}%</div>
+                    <div class="name" id="cpuText">cpu: {{int(cpu)}}%/{{dcpu}}%</div>
                     <div class="i">
-                        <div class="f" style="width: {{max(0, min((cpu/dcpu)*100, 100))}}%"></div>
+                        <div class="f" id="cpuBar" style="width: {{max(0, min((cpu/dcpu)*100, 100))}}%"></div>
                     </div>
                 </div>
                 <div class="item">
-                    <div class="name">ram: {{int(ram)}}MB/{{dram}}MB</div>
+                    <div class="name" id="ramText">ram: {{int(ram)}}MB/{{dram}}MB</div>
                     <div class="i">
-                        <div class="f" style="width: {{max(0, min((ram/dram)*100, 100))}}%"></div>
+                        <div class="f" id="ramBar" style="width: {{max(0, min((ram/dram)*100, 100))}}%"></div>
                     </div>
                 </div>
                 <div class="item">
-                    <div class="name">disk: {{int(disk)}}MB/{{ddisk}}MB</div>
+                    <div class="name" id="diskText">disk: {{int(disk)}}MB/{{ddisk}}MB</div>
                     <div class="i">
-                        <div class="f" style="width: {{max(0, min((disk/ddisk)*100, 100))}}%"></div>
+                        <div class="f" id="diskBar" style="width: {{max(0, min((disk/ddisk)*100, 100))}}%"></div>
                     </div>
                 </div>
                 <div class="item">
-                    <div class="name">slot: {{slot}}/{{dslot}}</div>
+                    <div class="name" id="slotText">slot: {{slot}}/{{dslot}}</div>
                     <div class="i">
-                        <div class="f" style="width: {{max(0, min((slot/dslot)*100, 100))}}%"></div>
+                        <div class="f" id="slotBar" style="width: {{max(0, min((slot/dslot)*100, 100))}}%"></div>
                     </div>
                 </div>
             </div>
@@ -145,5 +144,38 @@
             </div>
         </footer>
     </div>
+    <script>
+        (function () {
+            const clampPct = (v, t) => {
+                if (!t) return 0;
+                return Math.max(0, Math.min((v / t) * 100, 100));
+            };
+            fetch('/api/dashboard')
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data || !data.ok) return;
+                    const res = data.resources || {};
+                    const cpu = res.cpu || { available: 0, total: {{dcpu}} };
+                    const ram = res.ram || { available: 0, total: {{dram}} };
+                    const disk = res.disk || { available: 0, total: {{ddisk}} };
+                    const slot = res.slot || { available: 0, total: {{dslot}} };
+
+                    $('#cpuText').text(`cpu: ${parseInt(cpu.available, 10)}%/${cpu.total}%`);
+                    $('#ramText').text(`ram: ${parseInt(ram.available, 10)}MB/${ram.total}MB`);
+                    $('#diskText').text(`disk: ${parseInt(disk.available, 10)}MB/${disk.total}MB`);
+                    $('#slotText').text(`slot: ${parseInt(slot.available, 10)}/${slot.total}`);
+
+                    $('#cpuBar').css('width', `${clampPct(cpu.available, cpu.total)}%`);
+                    $('#ramBar').css('width', `${clampPct(ram.available, ram.total)}%`);
+                    $('#diskBar').css('width', `${clampPct(disk.available, disk.total)}%`);
+                    $('#slotBar').css('width', `${clampPct(slot.available, slot.total)}%`);
+
+                    if (data.isAdmin) {
+                        $('#adminLink').show();
+                    }
+                })
+                .catch(() => {});
+        })();
+    </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 import ende
 import db
@@ -11,15 +11,11 @@ def yacc():
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
-        
-        uDt = helper.checkPteroUser(check[1]["user"])
-        if (uDt[0] == False):
-            return f"""Something went wrong!\n\nuDt response:\n{uDt}"""
 
         return render_template(
             "account.html",
-            name=name,
-            isAdmin=uDt[1].get("root_admin",False),
+            name=helper.get_site_settings().get("site_name", name),
+            isAdmin=False,
             user=check[1]["user"],
             coin=check[1]["coin"],
             email=check[1]["email"],
@@ -28,9 +24,11 @@ def yacc():
             loadTime=int((time.time()-beginT)*100000)/100000
         )
 
-@app.route("/account/ptero/", methods=["GET"])
+@app.route("/account/ptero/", methods=["POST"])
 def pteroPwd():
-    if request.method == "GET":
+    if request.method == "POST":
+        if not helper.is_same_origin(request):
+            abort(403)
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
@@ -45,6 +43,8 @@ def pteroPwd():
 @app.route("/account/change/", methods=["POST"])
 def accChange():
     if request.method == "POST":
+        if not helper.is_same_origin(request):
+            abort(403)
         check = helper.chSID(request.cookies.get("sid"))
         if (not check[0]):
             return redirect("/login")
@@ -68,6 +68,8 @@ def accChange():
             return redirect(f"/account?err=Invalid current password.")
         elif (crpwd == nwpwd):
             return redirect(f"/account?err=changed")
+        elif (len(nwpwd) < 8):
+            return redirect(f"/account?err=Password too short.")
         else:
             conn = db.connect()
             cursor = conn.cursor()

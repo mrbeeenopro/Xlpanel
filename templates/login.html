@@ -7,9 +7,10 @@
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
     <link rel="stylesheet" href="/assets/css/general.css">
     <link rel="stylesheet" href="/assets/css/login.css">
+    <link rel="stylesheet" href="/theme.css">
     <script src="/assets/js/signF.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png">
+    <link rel="shortcut icon" href="{{site.get('site_logo', '/assets/img/logo.png')}}" type="image/png">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
     <title>Login - {{name}}</title>
 </head>
@@ -19,6 +20,7 @@
             <div class="form">
                 <h1 align="center">Login</h1>
                 <h4 align="center">Please login to continue.</h4>
+                <h4 align="center"><img src="{{site.get('site_logo', '/assets/img/logo.png')}}" style="max-height: 50px"></h4>
                 {% if error %}
                 <div class="error">
                     {{error}}
@@ -40,8 +42,14 @@
                     {% endif %}
                     <div class="submit">
                         <input type="submit" value="Sign In">
+                        {% if discord_oauth_enable %}
+                        <a href="/auth/discord/login"><h5>login with Discord</h5></a>
+                        {% endif %}
                         <a href="/forgot" style="float: right"><h5>forgot password?</h5></a>
                         <a href="/register"><h5>sign up?</h5></a>
+                        {% if site.get("discord_link") %}
+                        <a href="{{site.get('discord_link')}}" target="_blank"><h5>community discord</h5></a>
+                        {% endif %}
                     </div>
                 </form>
             </div>

@@ -1,5 +1,5 @@
 # type: ignore
-from __main__ import *
+from app.runtime import *
 import time
 import ende
 import db
@@ -12,23 +12,29 @@ def fg():
     if request.method == "GET":
         return render_template(
             "forgot.html",
-            name=name,
+            name=helper.get_site_settings().get("site_name", name),
             
             
             
         )
     elif request.method == "POST":
+        if not helper.is_same_origin(request):
+            abort(403)
         email = request.form.get("email","")
+        if not email or "@" not in email:
+            return jsonify({"status":"ok"})
         conn = db.connect()
         cursor = conn.cursor()
         
         cursor.execute("select lastSend from user where email=?", (email,))
         e = cursor.fetchall()
         if len(e)==0:
-            return jsonify({"status":"error", "message": "Email not found."})
+            conn.close()
+            return jsonify({"status":"ok"})
         ls = e[0][0]
         if (ls > time.time()-3600):
-            return jsonify({"status":"error", "message": f"Please wait {-int(time.time())+3600+ls}s!"})
+            conn.close()
+            return jsonify({"status":"ok"})
         nw = "".join(random.choice(_chr) for i in range(random.randint(10, 15)))
         e = sendmail.sendrspwd(email, nw)
         if (e[0]):
@@ -37,4 +43,5 @@ def fg():
             conn.close()
             return jsonify({"status": "ok"})
         else:
-            return jsonify({"status":"error", "message": f"Something went wrong!"})
+            conn.close()
+            return jsonify({"status": "ok"})

@@ -1,8 +1,7 @@
 import sqlite3
-import json
+from app.config_loader import load_config
 
-with open("config.json","r", encoding="utf-8") as f:
-    config = json.load(f)
+config = load_config()
 
 def connect():
     conn = sqlite3.connect(config["database"])
@@ -27,6 +26,15 @@ def connect():
                     passport varchar(255),
                     alive varchar(255)
                 )''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS site_settings
+                (
+                    key varchar(255) PRIMARY KEY,
+                    value text
+                )''')
+    try:
+        cursor.execute("ALTER TABLE user ADD COLUMN discord_id varchar(255) default ''")
+    except Exception:
+        pass
     cursor.execute('''CREATE TABLE IF NOT EXISTS verify
                 (
                     user varchar(255) PRIMARY KEY,
